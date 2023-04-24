@@ -1,4 +1,8 @@
+from __future__ import annotations
+
 from typing import Any, Optional, Iterable
+
+import numpy as np
 
 from .array_handler import ArrayHandler
 from custoch.precision import BasePrecision
@@ -12,7 +16,8 @@ class ArgsHandler(BasePrecision):
     args: list[Any]
 
     def __init__(
-            self, state: Optional[State | bool] = None,
+            self,
+            state: Optional[State | bool] = None,
             precision: str = 'float64',
             to_out: Optional[Iterable[int]] = None
     ):
@@ -22,6 +27,19 @@ class ArgsHandler(BasePrecision):
         self.state = state
         self.array_handlers = {}
         self.to_out = [] if to_out is None else list(to_out)
+
+    @staticmethod
+    def create_from_args(*args, state=False) -> ArgsHandler:
+        obj = ArgsHandler(state=state)
+        for idx, arg in enumerate(args):
+            try:
+                arr = np.array(arg)
+            except Exception:
+                continue
+            obj.add_args(
+                idx, out=True, shape=arr.shape, precision=str(arr.dtype)
+            )
+        return obj
 
     def validate_configuration(self) -> None:
         for index in self.to_out:
