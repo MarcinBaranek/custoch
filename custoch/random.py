@@ -62,7 +62,7 @@ class UniformGenerator(RandomGenerator):
         def __gen_uniform_32(start, end, state):
             thread_id = cuda.grid(1)
             return start + (end - start) * \
-                   xoroshiro128p_uniform_float32(state, thread_id)
+                xoroshiro128p_uniform_float32(state, thread_id)
 
         return __gen_uniform_32
 
@@ -73,7 +73,7 @@ class UniformGenerator(RandomGenerator):
         def __gen_uniform_64(start, end, state):
             thread_id = cuda.grid(1)
             return start + (end - start) * \
-                   xoroshiro128p_uniform_float64(state, thread_id)
+                xoroshiro128p_uniform_float64(state, thread_id)
 
         return __gen_uniform_64
 
