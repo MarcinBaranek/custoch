@@ -53,6 +53,7 @@ class ArgsHandler(BasePrecision):
             out: bool = False,
             shape: Optional[tuple[int, ...]] = None,
             precision: Optional[str] = None,
+            name: Optional[str] = None
     ) -> None:
         if not isinstance(index, int):
             raise TypeError(
@@ -69,7 +70,8 @@ class ArgsHandler(BasePrecision):
         self.array_handlers[index] = ArrayHandler(
             None,
             shape=shape,
-            precision=precision if precision else str(self.precision)
+            precision=precision if precision else str(self.precision),
+            name=name
         )
 
     def prepare_state(self, grid: Optional[tuple[int, int]] = None) -> None:

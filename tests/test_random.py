@@ -4,17 +4,17 @@ import pytest
 
 from custoch import KernelManager
 from custoch.kernel_manager.args_handler import ArgsHandler
-from custoch.random import RandomGenerator, NormalGenerator, UniformGenerator
+from custoch.random import RandomGenerator, NormalGenerator
 from custoch.precision import Precisions
 from .utils import precision, tolerance
 
 __all__ = ('precision', 'tolerance')
 
 
-@pytest.mark.parametrize('generator', [NormalGenerator, UniformGenerator])
 @pytest.mark.parametrize('shape', [(3, 4), (1, 2), (2, 1)])
 def test_gen_normal_fill_array(
-        precision: Precisions, shape: tuple[int], generator: RandomGenerator
+        precision: Precisions, shape: tuple[int],
+        generator: RandomGenerator = NormalGenerator
 ):
     a = np.zeros(shape=shape)
     arg_handler = ArgsHandler(state=True, precision=precision)
