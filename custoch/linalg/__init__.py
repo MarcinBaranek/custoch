@@ -24,3 +24,11 @@ def add(a, b, out):
     for i in range(a.shape[0]):
         for j in range(b.shape[1]):
             out[i, j] = a[i, j] + b[i, j]
+
+
+@cuda.jit(device=True)
+def write_from_to(source, destination):
+    """Just copy source to destination (should have the same shape)."""
+    for i in range(destination.shape[0]):
+        for j in range(destination.shape[1]):
+            destination[i, j] = source[i, j]
