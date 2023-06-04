@@ -1,16 +1,12 @@
-from dataclasses import dataclass, field
-
 from typing import Optional
 from numba import cuda
 from numba.cuda import random
 
 
-@dataclass
 class State:
-    n: Optional[int] = None
-    seed: int = 7
-    device_state: Optional[cuda.device_array] = \
-        field(init=False, repr=False, default=None)
+    n: Optional[int]
+    seed: int
+    device_state: Optional[cuda.device_array]
 
     """Class for store and create random state.
 
@@ -25,18 +21,35 @@ class State:
         Array with states stored on the GPU.
     """
 
-    def __post_init__(self):
-        if self.n:
+    def __init__(self, n: Optional[int] = None, seed: int = 7) -> None:
+        self._n = n
+        self.seed = seed
+        if n:
             self.device_state = random.create_xoroshiro128p_states(
                 self.n, self.seed
             )
         else:
             self.device_state = None
 
-    def set_n(self, n: int):
-        if self.n:
-            raise RuntimeError('Attribute n is already set in the State!')
-        self.n = n
-        self.device_state = random.create_xoroshiro128p_states(
-            self.n, self.seed
-        )
+    @property
+    def n(self) -> int:
+        if self._n is None:
+            raise RuntimeError(f'The value of n in {self} is no set yet!')
+        return self._n
+
+    @n.setter
+    def n(self, value: int) -> None:
+        if not isinstance(value, int):
+            raise TypeError(
+                f'n should be int, got: {value} with type: {type(value)}!'
+            )
+        if value <= 0:
+            raise ValueError(f'n should be positive int, got: {value}!')
+        self._n = value
+        if value is not None:
+            self.device_state = random.create_xoroshiro128p_states(
+                self.n, self.seed
+            )
+
+    def __str__(self) -> str:
+        return f'State(n: {self._n}, seed: {self.seed})'
