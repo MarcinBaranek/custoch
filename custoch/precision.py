@@ -31,7 +31,7 @@ class BasePrecision:
     def precision(self, value: str) -> None:
         if value not in tuple(Precisions):
             raise ValueError(
-                f'Precision should be one of {Precisions}, got: {value}'
+                f'Precision should be one of {tuple(Precisions)}, got: {value}'
             )
         self._precision = value
 
