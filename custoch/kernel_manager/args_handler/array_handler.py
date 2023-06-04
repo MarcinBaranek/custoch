@@ -47,17 +47,25 @@ class ArrayHandler(BasePrecision):
 
     shape: Optional[tuple[int, int]]
     device_array: Optional[cuda.device_array]
+    name: Optional[str] = None
 
     def __init__(
             self,
             array: Optional[ArrayLike] = None,
             shape: Optional[tuple[int, int]] = None,
-            precision: str = 'float64'
+            precision: str = 'float64',
+            name: Optional[str] = None
     ):
         super().__init__(precision=precision)
         self.shape = shape
         self.array = array
         self.device_array = None
+        self.name = name
+
+    def add_name(self) -> str:
+        if self.name is None:
+            return ''
+        return f'\nArray name: {self.name}'
 
     @property
     def shape(self) -> Optional[tuple[int, int]]:
@@ -70,15 +78,18 @@ class ArrayHandler(BasePrecision):
             return
         if not isinstance(value, tuple | list):
             raise TypeError(
-                f'Shape should be instance of tuple got: {value} '
-                f'with type: {type(value)}'
+                f'Shape should be instance of tuple '
+                f'got: {value} with type: {type(value)}' + self.add_name()
             )
         assert len(value) <= 2,\
-            f'Maximal allowed shape\'s dimension is 2, got shape: {value}'
+            f'Maximal allowed shape\'s dimension is 2, got shape: {value}'\
+            + self.add_name()
         assert len(value) >= 1,\
-            f'Minimal allowed shape\'s dimension is 1, got shape: {value}'
+            f'Minimal allowed shape\'s dimension is 1, got shape: {value}' \
+            + self.add_name()
         for item in value:
-            assert item > 0, 'Shape should have positive coefficients.'
+            assert item > 0, 'Shape should have positive coefficients.'\
+                             + self.add_name()
         self._shape = tuple(map(int, value))
 
     @property
@@ -93,14 +104,16 @@ class ArrayHandler(BasePrecision):
         self._array = np.array(value, dtype=self.precision)
         if self.shape:
             assert self._array.shape == self._shape,\
-                f'Array shape should be {self.shape}, got {self._array.shape}'
+                f'Array shape should be {self.shape},' \
+                f' got {self._array.shape}' + self.add_name()
 
     def to_device(self) -> cuda.device_array:
         """Send current content of the `array` to device and return device
         array object."""
         if self._array is None:
             raise RuntimeError(
-                'Array is still None and could not be sent to the device!'
+                'Array is still None and could not be sent to the device!' \
+                + self.add_name()
             )
         self.device_array = cuda.to_device(self._array)
         return self.device_array
@@ -109,6 +122,8 @@ class ArrayHandler(BasePrecision):
         """Copy current content of the `device_array` to host returning result.
         """
         if self.device_array is None:
-            raise RuntimeError('No data was sent to the device!')
+            raise RuntimeError(
+                'No data was sent to the device!' + self.add_name()
+            )
         self.device_array.copy_to_host(self._array)
         return self._array

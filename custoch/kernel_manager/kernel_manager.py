@@ -17,7 +17,7 @@ class KernelManager:
             if is_device else kernel
         self.args_handler = args_handler if args_handler else is_random
 
-    def __getitem__(self, grid) -> Callable[[...], None]:
+    def __getitem__(self, grid) -> Callable:
         def caller(*args):
             if isinstance(self.args_handler, bool):
                 self.args_handler = ArgsHandler.create_from_args(

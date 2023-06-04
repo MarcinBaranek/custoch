@@ -1,4 +1,5 @@
 from typing import Callable
+from abc import ABCMeta, abstractmethod
 
 from numba import cuda
 from numba.core.types import float16
@@ -9,10 +10,22 @@ from numba.cuda.random import (
 
 from .precision import Precisions
 
-__all__ = ('UniformGenerator', 'NormalGenerator')
+__all__ = ('RandomGenerator', 'UniformGenerator', 'NormalGenerator')
 
 
-class UniformGenerator:
+class RandomGenerator(metaclass=ABCMeta):
+    """Abstract class for random generators."""
+    @staticmethod
+    @abstractmethod
+    def get_kernel(
+            precision: Precisions
+    ) -> Callable[[float, float, cuda.device_array], float] \
+            | Callable[[cuda.device_array, cuda.device_array], None]:
+        """Return CUDA kernel for generating random numbers."""
+        pass
+
+
+class UniformGenerator(RandomGenerator):
     @staticmethod
     def get_kernel(
             precision
@@ -49,7 +62,7 @@ class UniformGenerator:
         def __gen_uniform_32(start, end, state):
             thread_id = cuda.grid(1)
             return start + (end - start) * \
-                   xoroshiro128p_uniform_float32(state, thread_id)
+                xoroshiro128p_uniform_float32(state, thread_id)
 
         return __gen_uniform_32
 
@@ -60,12 +73,12 @@ class UniformGenerator:
         def __gen_uniform_64(start, end, state):
             thread_id = cuda.grid(1)
             return start + (end - start) * \
-                   xoroshiro128p_uniform_float64(state, thread_id)
+                xoroshiro128p_uniform_float64(state, thread_id)
 
         return __gen_uniform_64
 
 
-class NormalGenerator:
+class NormalGenerator(RandomGenerator):
     @staticmethod
     def get_kernel(
             precision
@@ -98,7 +111,7 @@ class NormalGenerator:
 
     @staticmethod
     def get_for_float32() \
-            -> Callable[[cuda.device_array, cuda.device_array], float]:
+            -> Callable[[cuda.device_array, cuda.device_array], None]:
         @cuda.jit(device=True)
         def __gen_normal_32(place_holder, state):
             thread_id = cuda.grid(1)
@@ -111,7 +124,7 @@ class NormalGenerator:
 
     @staticmethod
     def get_for_float64() \
-            -> Callable[[cuda.device_array, cuda.device_array], float]:
+            -> Callable[[cuda.device_array, cuda.device_array], None]:
         @cuda.jit(device=True)
         def __gen_normal_64(place_holder, state):
             thread_id = cuda.grid(1)

@@ -4,19 +4,23 @@ import pytest
 
 from custoch import KernelManager
 from custoch.kernel_manager.args_handler import ArgsHandler
-from custoch.random import NormalGenerator
+from custoch.random import RandomGenerator, NormalGenerator
+from custoch.precision import Precisions
 from .utils import precision, tolerance
 
 __all__ = ('precision', 'tolerance')
 
 
 @pytest.mark.parametrize('shape', [(3, 4), (1, 2), (2, 1)])
-def test_gen_normal_fill_array(precision, shape: tuple[int]):
+def test_gen_normal_fill_array(
+        precision: Precisions, shape: tuple[int],
+        generator: RandomGenerator = NormalGenerator
+):
     a = np.zeros(shape=shape)
     arg_handler = ArgsHandler(state=True, precision=precision)
     arg_handler.add_args(0, out=True, shape=shape, precision=precision)
     kernel = KernelManager(
-        NormalGenerator.get_kernel(precision),
+        generator.get_kernel(precision),
         arg_handler,
         is_device=True,
         n_args=2
@@ -25,7 +29,7 @@ def test_gen_normal_fill_array(precision, shape: tuple[int]):
     assert (a ** 2).sum() > 2
 
 
-def test_gen_normal_match_values(precision):
+def test_gen_normal_match_values(precision: Precisions):
     a = np.zeros(shape=(1, 4))
     arg_handler = ArgsHandler(state=True, precision=precision)
     arg_handler.add_args(0, out=True, shape=(1, 4), precision=precision)

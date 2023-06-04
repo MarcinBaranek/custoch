@@ -12,6 +12,9 @@ class Precisions(str, Enum):
     def __contains__(self, item: str) -> bool:
         return item in tuple(Precisions)
 
+    def __str__(self):
+        return self.value
+
 
 class BasePrecision:
     """Class for Handling precision"""
@@ -28,8 +31,7 @@ class BasePrecision:
     def precision(self, value: str) -> None:
         if value not in tuple(Precisions):
             raise ValueError(
-                f'Precision should be one of {Precisions}, '
-                f'got: {value}'
+                f'Precision should be one of {tuple(Precisions)}, got: {value}'
             )
         self._precision = value
 

@@ -53,6 +53,7 @@ class ArgsHandler(BasePrecision):
             out: bool = False,
             shape: Optional[tuple[int, ...]] = None,
             precision: Optional[str] = None,
+            name: Optional[str] = None
     ) -> None:
         if not isinstance(index, int):
             raise TypeError(
@@ -69,14 +70,19 @@ class ArgsHandler(BasePrecision):
         self.array_handlers[index] = ArrayHandler(
             None,
             shape=shape,
-            precision=precision if precision else str(self.precision)
+            precision=precision if precision else str(self.precision),
+            name=name
         )
 
     def prepare_state(self, grid: Optional[tuple[int, int]] = None) -> None:
+        if len(grid) != 2:
+            raise NotImplementedError(
+                'Grid with dimension differ form 2 is not Supported!'
+            )
         if grid is None:
             return
-        if self.state and self.state.n is None:
-            self.state.set_n(grid[0] * grid[1])
+        if self.state:
+            self.state.n = grid[0] * grid[1]
 
     def __call__(
             self, *args, grid: Optional[tuple[int, int]] = None
