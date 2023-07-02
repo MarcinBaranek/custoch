@@ -1,7 +1,8 @@
 from typing import TypeVar, Generic
 
 __all__ = (
-    'd', 'm', 'One', 'RandomState', 'Vector', 'Matrix', 'Out', 'dW', 'Time'
+    'd', 'm', 'One', 'RandomState', 'Vector', 'Matrix', 'Out', 'dW', 'Time',
+    'T', 't_0', 'N'
 )
 
 d = TypeVar('d', bound=int)
@@ -11,7 +12,9 @@ m = TypeVar('m', bound=int)
 One = TypeVar('One', bound=int)
 RandomState = TypeVar('RandomState')
 dW = TypeVar('dW')
-T = TypeVar('T')
+T = TypeVar('T', bound=float)
+N = TypeVar('N', bound=int)
+t_0 = TypeVar('t_0', bound=float)
 S = TypeVar('S')
 Time = float
 """Generally timestamp used in function describing a equations."""

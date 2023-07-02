@@ -19,7 +19,7 @@ def raise_type_error(name: str, variable: Any) -> NoReturn:
 class EulerDriftStep:
     @staticmethod
     def get_kernel(
-            kernel: Callable[
+            drift_function: Callable[
                 [Time, Vector[d, One], Out[d, One]],
                 None
             ]
@@ -31,7 +31,7 @@ class EulerDriftStep:
                 time: Time, point: cuda.device_array,  dt: float,
                 out: cuda.device_array
         ):
-            kernel(time, point, out)
+            drift_function(time, point, out)
             scale(dt, out)
 
         return __euler_drift_step_out

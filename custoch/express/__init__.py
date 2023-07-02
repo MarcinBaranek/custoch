@@ -1,3 +1,3 @@
 """Package contains high levels methods and classes."""
 
-from .weak_appro import WeakApprox
+from .weak_approx import WeakApprox
