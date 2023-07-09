@@ -29,11 +29,21 @@ class SecondDim(Generic[S]):
 
 
 class Vector(FirstDim[T], SecondDim[S]):
-    pass
+    shape: tuple[int, int]
+
+    def __getitem__(self, item):
+        pass
+
+    def __setitem__(self, key, value):
+        pass
 
 
 class Matrix(FirstDim[T], SecondDim[S]):
-    pass
+    def __getitem__(self, item):
+        pass
+
+    def __setitem__(self, key, value):
+        pass
 
 
 class Out(FirstDim[T], SecondDim[S]):
