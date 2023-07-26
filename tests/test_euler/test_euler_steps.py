@@ -7,9 +7,7 @@ import pytest
 from custoch import KernelManager, State
 from custoch.kernel_manager.args_handler import ArgsHandler
 from custoch.precision import Precisions
-from custoch.euler.euler_steps import (
-    EulerDriftStep, EulerDiffusionStep, EulerStep, EulerPath
-)
+from custoch.euler.euler_steps import EulerStep, EulerPath
 from ..utils import precision, tolerance
 
 __all__ = ('precision', 'tolerance')
@@ -38,66 +36,6 @@ def drift_kernel(t, x, out):
 def drift_expected(x, dt):
     return numpy.array(
         [[(i + 1) * x[i, 0] / 4 * dt] for i in range(x.shape[0])]
-    )
-
-
-@pytest.mark.parametrize('dt', [0.01, 0.0001, 0.1, 1, 10])
-@pytest.mark.parametrize('shape', [(3, 1), (2, 1), (6, 1), (1, 1)])
-def test_drift_step(
-        precision: Precisions, shape: tuple[int], dt: float
-):
-    a = np.ones(shape=shape)
-    result = np.zeros(shape=shape)
-    arg_handler = ArgsHandler(state=False, precision=precision)
-    arg_handler.add_args(1, out=False, shape=shape, precision=precision)
-    arg_handler.add_args(3, out=True, shape=shape, precision=precision)
-    kernel = KernelManager(
-        EulerDriftStep.get_kernel(drift_kernel),
-        arg_handler,
-        is_device=True,
-        n_args=4
-    )
-    kernel[1, 1](0., a, dt, result)
-    npt.assert_allclose(
-        result, drift_expected(a, dt), atol=tolerance[precision]
-    )
-
-
-@pytest.mark.parametrize('dt', [0.01, 0.0001, 0.1, 1, 10])
-@pytest.mark.parametrize('dim', [1, 2, 3, 6])
-@pytest.mark.parametrize('diffusion_kernel', [1, 2, 3, 4], indirect=True)
-def test_diffusion_step(
-        precision: Precisions,
-        diffusion_kernel,
-        dim: int, dt: float
-):
-    wiener_dim: int = diffusion_kernel.wiener_dim
-    # dw for state with seed 7
-    dw = np.array([[0.61972869], [-1.33773295], [-0.44804679], [-0.94795856]])\
-         * np.sqrt(dt)
-    a = np.ones(shape=(dim, 1))
-    diffusion_result = np.zeros(shape=(dim, wiener_dim))
-    result = np.zeros(shape=(dim, 1))
-
-    arg_handler = ArgsHandler(state=State(n=1, seed=7), precision=precision)
-    arg_handler.add_args(
-        1, out=False, shape=(dim, 1), precision=precision
-    )
-    arg_handler.add_args(3, out=True, shape=(dim, 1), precision=precision)
-    kernel = KernelManager(
-        EulerDiffusionStep(
-            diffusion_kernel, dim, wiener_dim, precision
-        ).get_kernel(),
-        arg_handler,
-        is_device=True,
-        n_args=5
-    )
-    kernel[1, 1](0., a, dt, result)
-    diffusion_kernel.py_func(0., a, diffusion_result)
-    exp_result = diffusion_result @ dw[:wiener_dim, ...]
-
-    npt.assert_allclose(
-        result, exp_result, atol=tolerance[precision]
     )
 
 
