@@ -5,6 +5,18 @@ from .wrapped_device_function import get_device_function_wrapper
 
 
 class KernelManager:
+    """Class for wrapping CUDA kernels.
+
+    This wrapper simplifies the interfaces of kernels.
+    The wrapper is handling under the hood
+        * Coping arrays between host and device
+        * Random state if kernel needs it.
+
+    Examples
+    --------
+    TBD :)
+    Currently we refer to examples.
+    """
     def __init__(
             self,
             kernel,

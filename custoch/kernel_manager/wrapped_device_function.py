@@ -5,6 +5,14 @@ __all__ = ('get_device_function_wrapper',)
 
 
 def get_device_function_wrapper(device_function, n_args: int):
+    """Wrap device kernel in to a global kernel.
+
+    Parameters
+    ----------
+    device_function: Device CUDA kernel, wrapped by numba
+    n_args: int
+        Number of all arguments taken by device kernel.
+    """
     def n_arg_wrapper_1(func):
         @cuda.jit
         def wrapped_device_function(a):

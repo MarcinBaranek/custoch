@@ -6,6 +6,11 @@ from .base import AbstractWeakApproxStrategy
 
 
 class WeakApproxOnlyLastStrategy(AbstractWeakApproxStrategy):
+    """
+    Strategy returns only last point of each trajectory.
+    In case `K` trajectories and dimension of the space variable `d`,
+    the result array should have shape: `(d,K)`
+    """
     def get_internal_kernel(self, weak_approx_config: WeakApproxAbstraction):
         return EulerPath(
             drift_function=weak_approx_config.drift_function,

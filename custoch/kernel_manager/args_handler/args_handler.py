@@ -10,9 +10,18 @@ from custoch.state import State
 
 
 class ArgsHandler(BasePrecision):
+    """Class responsible for handling all arguments of given CUDA kernel.
+
+    To handle arguments that are array like, the `ArrayHandler` is using.
+    """
     array_handlers: dict[int, ArrayHandler]
+    """Dictionary with `ArrayHandler` for parameter in position respectively 
+    to keys of the dictionary."""
     to_out: list[int]
+    """For arguments with positional index in `to_out` the content will be 
+    copied to host after call kernel"""
     state: Optional[State]
+    """Random state for Kernel."""
     args: list[Any]
 
     def __init__(
@@ -30,6 +39,14 @@ class ArgsHandler(BasePrecision):
 
     @staticmethod
     def create_from_args(*args, state=False) -> ArgsHandler:
+        """Create `ArgsHandler` in the fly.
+
+        On the runtime the function needs to know if kernel is using random
+        state or not.
+
+        This method could not work correctly in all cases.
+        Should be used only in really simple cases.
+        """
         obj = ArgsHandler(state=state)
         for idx, arg in enumerate(args):
             try:
@@ -55,6 +72,35 @@ class ArgsHandler(BasePrecision):
             precision: Optional[str] = None,
             name: Optional[str] = None
     ) -> None:
+        """Add information about parameter to `ArgsHandler`.
+
+        Parameters
+        ----------
+        index: int
+            Positional index of parameter
+        out: bool
+            Indicate if after call kernel the content of this argument should
+            be copied to the host.
+            Default False.
+        shape: Optional[tuple[int, ...]]
+            Optional expected shape of the parameter if is array like.
+            Default None.
+        precision: Optional[str]
+            Optional precision of the argument.
+        name: Optional[str]
+            For debug purpose. If given argument don't met validation
+            condition then, the name will be added to the error message.
+
+        Returns
+        -------
+        None
+
+        Raises
+        ------
+        TypeError: When `index` is not int.
+        ValueError: When `index` is negative.
+        RuntimeError: When parameter with given `index` is already added.
+        """
         if not isinstance(index, int):
             raise TypeError(
                 f'index should be int, got: {index} with type: {type(index)}.'
