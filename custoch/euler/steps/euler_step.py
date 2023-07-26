@@ -21,7 +21,7 @@ class EulerStep(BaseStep):
             [Time, Vector[d, One], float, Out[d, One], RandomState], None
     ] | Callable:
         drift_step_kernel = EulerDriftStep.get_kernel(self.drift_function)
-        diffusion_step_kernel = self.diffusion_step.get_kernel().get_kernel()
+        diffusion_step_kernel = self.diffusion_step.get_kernel()
         dim = self.diffusion_step.dim
         precision = self.diffusion_step.precision.value
 

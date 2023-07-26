@@ -1,14 +1,13 @@
 from typing import Callable, Any, NoReturn
 from dataclasses import dataclass
-from ..linalg import add, write_from_to
+from ..linalg import write_from_to
 from ..precision import Precisions
 from ..typing import *
 from numba import cuda
-from .steps.drift import EulerDriftStep
 from .steps.diffusion import ClassicalEulerDiffusionStep
-# from .steps import EulerStep
+from .steps import EulerStep
 
-__all__ = ('EulerStep', 'EulerDriftStep', 'EulerPath')
+__all__ = ('EulerPath',)
 
 
 def raise_type_error(name: str, variable: Any) -> NoReturn:
@@ -18,7 +17,7 @@ def raise_type_error(name: str, variable: Any) -> NoReturn:
 
 
 @dataclass(slots=True, frozen=True)
-class EulerStep:
+class EulerStepCLS:
     drift_function: Callable[[Time, Vector[d, One], Out[d, One]], None]
     diffusion_kernel: Callable[[Time, Vector[d, One], Out[d, m]], None]
     wiener_dim: m
@@ -26,56 +25,21 @@ class EulerStep:
     precision: Precisions = Precisions.float64
 
     def get_kernel(
-            self, with_user_dw: bool = False
+            self
     ) -> Callable[
             [Time, Vector[d, One], float, Out[d, One], RandomState], None
     ] | Callable:
-        drift_step_kernel = EulerDriftStep.get_kernel(self.drift_function)
-        diffusion_step_kernel = ClassicalEulerDiffusionStep(
-            self.diffusion_kernel, self.dim, self.wiener_dim, self.precision
+        return EulerStep(
+            drift_function=self.drift_function,
+            diffusion_step=ClassicalEulerDiffusionStep(
+                self.diffusion_kernel, self.dim,
+                self.wiener_dim, self.precision
+            )
         ).get_kernel()
-        dim = self.dim
-        precision = self.precision.value
-        args = (drift_step_kernel, diffusion_step_kernel, dim, precision)
-        match with_user_dw:
-            case True: return self.get_euler_step_with_user_dw(*args)
-            case False: return self.get_euler_step(*args)
-            case _: raise_type_error('with_user_dw', with_user_dw)
-
-    @staticmethod
-    def get_euler_step(
-            drift_step_kernel: Callable[
-                [Time, Vector[d, One], float, Out[d, One]], None
-            ],
-            diffusion_step_kernel: Callable[
-                [Time, Vector[d, One], float, Out[d, One], RandomState], None
-            ],
-            dim: int,
-            precision: str
-    ) -> Callable[
-            [Time, Vector[d, One], float, Out[d, One], RandomState],
-            None
-    ]:
-        @cuda.jit(device=True)
-        def __euler_step(
-                time: float, point: cuda.device_array, dt: float,
-                out: cuda.device_array, state: cuda.device_array
-        ):
-            tmp_drift = cuda.local.array(shape=(dim, 1), dtype=precision)
-            drift_step_kernel(time, point, dt, tmp_drift)
-            diffusion_step_kernel(time, point, dt, out, state)
-            add(tmp_drift, out, out)
-            add(point, out, out)
-
-        return __euler_step
-
-    @staticmethod
-    def get_euler_step_with_user_dw(*args):
-        raise NotImplementedError()
 
 
 @dataclass(slots=True, frozen=True)
-class EulerPath(EulerStep):
+class EulerPath(EulerStepCLS):
     t_0: float = 0.
     T: float = 1.
     N: int = 100
@@ -88,7 +52,7 @@ class EulerPath(EulerStep):
     ) -> Callable[
             [Time, Vector[d, One], float, Out[d, One], RandomState], None
     ] | Callable:
-        euler_step = super(self.__class__, self).get_kernel(with_user_dw=False)
+        euler_step = super(self.__class__, self).get_kernel()
         dt = (self.T - self.t_0) / self.N
         if only_last:
             return self.get_euler_path_only_last(

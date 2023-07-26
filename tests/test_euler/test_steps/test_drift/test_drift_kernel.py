@@ -1,28 +1,15 @@
-import numpy
 import numpy as np
 import numpy.testing as npt
-from numba import cuda
 import pytest
 
 from custoch import KernelManager
 from custoch.kernel_manager.args_handler import ArgsHandler
 from custoch.precision import Precisions
-from custoch.euler.euler_steps import EulerDriftStep
+from custoch.euler.steps.drift import EulerDriftStep
 from ....utils import precision, tolerance
+from ..fixtures import drift_kernel, drift_expected
 
 _ = precision
-
-
-@cuda.jit(device=True)
-def drift_kernel(t, x, out):
-    for i in range(x.shape[0]):
-        out[i, 0] = (i + 1) * x[i, 0] / 4
-
-
-def drift_expected(x, dt):
-    return numpy.array(
-        [[(i + 1) * x[i, 0] / 4 * dt] for i in range(x.shape[0])]
-    )
 
 
 @pytest.mark.parametrize('dt', [0.01, 0.0001, 0.1, 1, 10])
