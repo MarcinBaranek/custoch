@@ -1,4 +1,4 @@
-from typing import Callable, Any, NoReturn
+from typing import Callable
 from dataclasses import dataclass
 from ..linalg import write_from_to
 from ..precision import Precisions
@@ -8,12 +8,6 @@ from .steps.diffusion import ClassicalEulerDiffusionStep
 from .steps import EulerStep
 
 __all__ = ('EulerPath',)
-
-
-def raise_type_error(name: str, variable: Any) -> NoReturn:
-    raise TypeError(
-        f'`{name}` should be bool, got: {variable} with type: {type(variable)}'
-    )
 
 
 @dataclass(slots=True, frozen=True)

@@ -11,10 +11,10 @@ __all__ = ('precision', 'tolerance')
 
 
 # @pytest.mark.parametrize('dt', [0.01, 0.0001, 0.1, 1, 10])
-# @pytest.mark.parametrize('shape', [(3, 2), (2, 3), (6, 4)])
+@pytest.mark.parametrize('shape', [(3, 2), (2, 3), (6, 4)])
 @pytest.mark.parametrize('diffusion_kernel', [1, 2, 3, 4], indirect=True)
 def test_euler_path(
-        precision: Precisions, diffusion_kernel, shape: tuple[int] = (3, 2)
+        precision: Precisions, diffusion_kernel, shape: tuple[int]
 ):
     shape = (shape[0], diffusion_kernel.wiener_dim)
     N = 1000

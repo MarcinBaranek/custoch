@@ -13,10 +13,7 @@ __all__ = ('EulerDriftStep',)
 class EulerDriftStep(BaseStep):
     @staticmethod
     def get_kernel(
-            drift_function: Callable[
-                [Time, Vector[d, One], Out[d, One]],
-                None
-            ]
+            drift_function: Callable[[Time, Vector[d, One], Out[d, One]], None]
     ) -> Callable[
         [Time, Vector[d, One], float, Out[d, One]], None
     ]:
