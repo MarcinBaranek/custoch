@@ -3,6 +3,8 @@ from enum import Enum
 import numpy as np
 from numba.core.types import float16, float32, float64, Float
 
+__all__ = ('Precisions', 'BasePrecision')
+
 
 class Precisions(str, Enum):
     float16: str = 'float16'
@@ -21,7 +23,11 @@ class BasePrecision:
     precision: str
 
     def __init__(self, precision: str = 'float64', *args, **kwargs):
-        self.precision = precision
+        if precision == np.float32:
+            precision = 'float32'
+        if precision == np.float64:
+            precision = 'float64'
+        self.precision = Precisions(precision)
 
     @property
     def precision(self) -> type:
