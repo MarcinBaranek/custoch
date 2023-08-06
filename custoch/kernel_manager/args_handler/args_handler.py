@@ -61,8 +61,8 @@ class ArgsHandler(BasePrecision):
     def validate_configuration(self) -> None:
         for index in self.to_out:
             assert index in self.array_handlers.keys(),\
-                'For argument with results form device, ' \
-                'an `ArrayHandler` should be created!'
+                f'For argument with results form device, ' \
+                f'an `ArrayHandler` should be created! Check index: {index}'
 
     def add_args(
             self,
@@ -116,7 +116,7 @@ class ArgsHandler(BasePrecision):
         self.array_handlers[index] = ArrayHandler(
             None,
             shape=shape,
-            precision=precision if precision else str(self.precision),
+            precision=precision if precision else self.precision,
             name=name
         )
 
